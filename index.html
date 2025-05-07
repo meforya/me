@@ -15,10 +15,10 @@
             font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 40px 20px; /* Default padding */
-            background-color: #f9f9f9;
+            /* Removed background-color here, will be handled by the background container */
             color: #1a1a1a;
             line-height: 1.6;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            transition: color 0.3s ease; /* Only transition color */
             /* Ensure body is positioned for absolute children */
             position: relative;
             overflow-x: hidden; /* Prevent horizontal scrollbar from petals */
@@ -26,7 +26,7 @@
 
         /* Dark mode styles for the body */
         body.dark-mode {
-            background-color: #121212;
+            /* Removed background-color here */
             color: #f5f5f5;
         }
 
@@ -36,6 +36,44 @@
                 padding: 20px 10px;
             }
         }
+
+        /* --- Background Image Container Styles --- */
+        .background-container {
+            position: fixed; /* Fixed position to cover the viewport */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2; /* Place the background behind everything */
+            overflow: hidden; /* Hide any overflow from the image */
+            background-color: #f9f9f9; /* Default background color */
+            transition: background-color 0.3s ease;
+        }
+
+        /* Dark mode styles for the background container */
+        .background-container.dark-mode {
+            background-color: #121212;
+        }
+
+        .background-image {
+            display: block; /* Remove extra space below image */
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Cover the entire container while maintaining aspect ratio */
+            filter: brightness(70%); /* Adjust brightness for better text readability (was 50% for video) */
+            /* Adjusted transition duration for filter and transform properties */
+            transition: filter 1s ease-in-out, transform 1s ease-in-out;
+            /* Default scale for light mode */
+            transform: scale(1);
+        }
+
+        /* Dark mode styles for the background image */
+        .background-image.dark-mode {
+            filter: brightness(40%); /* Darken more in dark mode */
+            /* Slightly zoom in for dark mode */
+            transform: scale(1.05);
+        }
+
 
         /* Container for the dark mode toggle and local time display */
         .top-left-controls {
@@ -99,7 +137,7 @@
         #download-btn.dark-mode {
             background-color: #222; /* Dark mode background */
             border-color: #555; /* Dark mode border color */
-            color: #eee; /* Dark mode icon color */
+            color: #fff;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3); /* Dark mode shadow */
         }
         #download-btn.dark-mode:hover {
@@ -125,14 +163,14 @@
             border-radius: 16px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.06);
             transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-            position: relative; /* Ensure container is above the video */
-            z-index: 1; /* Ensure container is above the video */
+            position: relative; /* Ensure container is above the background */
+            z-index: 1; /* Ensure container is above the background */
         }
 
          /* Media query for smaller screens: reduce container padding */
         @media (max-width: 768px) {
-            body {
-                padding: 20px 10px;
+            .container {
+                padding: 24px;
             }
         }
 
@@ -370,12 +408,12 @@
         }
 
         /* Dark mode styles for the toggle button */
-        #dark-mode-toggle.dark-mode {
+        #download-btn.dark-mode {
             background: #222;
             border-color: #555;
             color: #fff;
         }
-        #dark-mode-toggle.dark-mode:hover { background: #333; }
+        #download-btn.dark-mode:hover { background: #333; }
 
         /* Ensure icon inside toggle button inherits color */
         #dark-mode-toggle i { width: 20px; height: 20px; }
@@ -401,7 +439,7 @@
         /* Styling for subtle graduation years - Adjusted font-size */
         .graduation-year {
             font-weight: 300; /* Lighter font weight */
-            color: #777; /* Softer color */
+            color: #777;
             font-style: normal; /* Remove italics */
             font-size: 0.85rem; /* Made slightly smaller */
             transition: color 0.3s ease;
@@ -418,14 +456,16 @@
             /* Initial size defined here, will be overridden by JS for variation */
             width: 15px;
             height: 15px;
-            background-color: #ffda3e; /* Sunflower yellow */
+            /* Removed background-color from CSS */
             border-radius: 50% 0; /* Creates a petal shape */
-            pointer-events: none; /* Allow clicks/interactions on elements below */
+            pointer-events: none; /* Allow interactions with elements below */
             opacity: 1;
             transform-origin: 50% 50%; /* Rotate around the center */
             /* Animation uses a CSS variable for the final rotation */
             animation: fadeOutPetal 2s ease-out forwards;
             z-index: 999; /* Ensure petals are below fixed elements but above content */
+             /* Added transition for background-color */
+            transition: background-color 0.3s ease;
         }
 
         /* Keyframes for the fade out animation - Adjusted translateY and uses CSS variable for rotation */
@@ -434,25 +474,13 @@
             100% { opacity: 0; transform: translateY(150px) rotate(var(--final-rotation)); } /* Increased translateY for more fall, uses random final rotation */
         }
 
-        /* --- Background Video Styles --- */
-        #background-video {
-            position: fixed; /* Fixed position to cover the viewport */
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Cover the entire container while maintaining aspect ratio */
-            z-index: -1; /* Place the video behind other content */
-            filter: brightness(50%); /* Optional: Darken the video slightly for better text readability */
-        }
 
     </style>
 </head>
 <body>
-    <video autoplay loop muted playsinline id="background-video">
-        <source src="YOUR_VIDEO_URL.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
+    <div class="background-container" id="background-container">
+        <img src="https://static.wixstatic.com/media/9ba0fd_69c4253c16cd49fea718d234fbf98e47~mv2.png" alt="Background image of sunflowers" class="background-image" id="background-image">
+    </div>
 
     <div class="top-left-controls">
         <button id="dark-mode-toggle" aria-label="Toggle dark mode">
@@ -527,7 +555,7 @@
             <h2>Experience</h2>
             <div class="experience-entry">
                 <div class="experience-company">Zomato</div>
-                <div class="experience-role">Visual Designer, Marketing and Product</div>
+                <div class="experience-role">Visual Designer, Marketing</div>
                 <div class="experience-duration">Sep 2024 – Present</div>
                 <ul>
                     <li>Developed and executed visual designs for marketing campaigns across various platforms.</li>
@@ -576,6 +604,7 @@
                 <ul>
                     <li>Assisted in the design of user interfaces and user experiences for mobile applications.</li>
                     <li>Conducted user research and usability testing to inform design decisions.</li>
+                    <li>Designed and prototyped user interfaces for various applications.</li>
                 </ul>
             </div>
              <div class="experience-entry">
@@ -674,11 +703,21 @@
             const topLeftControls = document.querySelector('.top-left-controls'); // Get the top-left container
             const graduationYears = document.querySelectorAll('.graduation-year'); // Get the graduation year elements
             const interestItems = document.querySelectorAll('.interest-item'); // Get all interest items
+            const backgroundImage = document.getElementById('background-image'); // Get the background image element
+            const backgroundContainer = document.getElementById('background-container'); // Get the background container element
+
+            // Image URLs for light and dark modes
+            const lightModeImageUrl = "https://static.wixstatic.com/media/9ba0fd_69c4253c16cd49fea718d234fbf98e47~mv2.png";
+            const darkModeImageUrl = "https://static.wixstatic.com/media/9ba0fd_4f4ec4176ad5472d965844aadcb85100~mv2.png";
+
+            // Petal colors for light and dark modes
+            const lightModePetalColor = "#ffda3e"; // Sunflower yellow
+            const darkModePetalColor = "#d9531e"; // Darker orangish-red
 
 
             // Select all elements that need class toggling for dark mode
             const elementsToToggle = [
-                body, container, downloadButton, darkModeToggle, languagesItem, localTimeDisplay, topLeftControls,
+                body, container, downloadButton, darkModeToggle, languagesItem, localTimeDisplay, topLeftControls, backgroundContainer, backgroundImage,
                 ...document.querySelectorAll('h1'),
                 ...document.querySelectorAll('.subtext'),
                 ...document.querySelectorAll('.contact-combo'),
@@ -704,6 +743,14 @@
                 themeText.textContent = 'Dark Mode'; // Update text for accessibility
                 themeIcon.setAttribute('data-lucide', 'moon'); // Change icon to moon
                 lucide.createIcons(); // Re-render lucide icons
+                // Change background image for dark mode
+                if (backgroundImage) {
+                    backgroundImage.src = darkModeImageUrl;
+                }
+                // Change petal color for dark mode
+                document.querySelectorAll('.petal').forEach(petal => {
+                    petal.style.backgroundColor = darkModePetalColor;
+                });
             }
 
             // Function to remove dark mode styles
@@ -713,6 +760,14 @@
                 themeText.textContent = 'Light Mode'; // Update text for accessibility
                 themeIcon.setAttribute('data-lucide', 'sun'); // Change icon to sun
                 lucide.createIcons(); // Re-render lucide icons
+                 // Change background image back for light mode
+                if (backgroundImage) {
+                    backgroundImage.src = lightModeImageUrl;
+                }
+                 // Change petal color back for light mode
+                 document.querySelectorAll('.petal').forEach(petal => {
+                    petal.style.backgroundColor = lightModePetalColor;
+                });
             }
 
             // Check local storage on load and apply theme
@@ -831,8 +886,8 @@
             petalContainer.style.left = '0';
             petalContainer.style.width = '100%';
             petalContainer.style.height = '100%';
-            petalContainer.style.pointerEvents = 'none'; // Allow interaction with elements below
-            petalContainer.style.zIndex = '999'; // Ensure it's above the background but below fixed elements
+            petalContainer.style.pointerEvents = 'none'; // Allow interactions with elements below
+            petalContainer.style.zIndex = 999; // Ensure it's above the background but below fixed elements
             document.body.appendChild(petalContainer); // Add container to the body
 
             let lastPetalTime = 0;
@@ -859,6 +914,14 @@
 
                     const petal = document.createElement('div');
                     petal.classList.add('petal');
+
+                    // Set petal color based on current dark mode state
+                    if (body.classList.contains('dark-mode')) {
+                        petal.style.backgroundColor = darkModePetalColor;
+                    } else {
+                        petal.style.backgroundColor = lightModePetalColor;
+                    }
+
 
                     // Position the petal slightly above the cursor for a falling effect
                     petal.style.left = `${currentX}px`;
